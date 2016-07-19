@@ -1,0 +1,36 @@
+/** Load dataset in RDD*/
+
+val flightrdd = sc.textFile("/home/administrator/Downloads/flightdata-2years.csv")
+
+/** Omitt the first line (header)*/
+
+val header = flightrdd.first()
+
+val frdd=flightrdd.filter(x=> x!=header)
+
+/** Create RDD for Flight A with (Unique Carrrier, Date, Destination) as key*/
+
+val f1 = frdd.map(line=> (line.split(",")(8)+","+line.split(",")(0)+"/"+line.split(",")(1)+"/"+line.split(",")(2)+","+line.split(",")(17),line.split(",")(9)+","+line.split(",")(16)+","+line.split(",")(17)+","+line.split(",")(7)+","+line.split(",")(5)))
+
+/** Create RDD for Flight B with (Unique Carrrier, Date, Origin) as key*/
+
+val f2 = frdd.map(line=> (line.split(",")(8)+","+line.split(",")(0)+"/"+line.split(",")(1)+"/"+line.split(",")(2)+","+line.split(",")(16),line.split(",")(9)+","+line.split(",")(16)+","+line.split(",")(17)+","+line.split(",")(7)+","+line.split(",")(5)))
+
+/** Join both the RDDs */
+
+val f3 = f1.join(f2)
+
+/** Extract data from nested tuple*/
+
+val f4 = f3.map(line=>(line._1+","+line._2._1+","+line._2._2))
+
+/** Filter the flights having layover more than 1 Hr and less than 5 Hrs*/
+
+val f5 = f4.filter(line=> (line.split(",")(12).toInt-line.split(",")(6).toInt)>=100 && (line.split(",")(12).toInt-line.split(",")(6).toInt)<=500)
+
+/** Rearrange the flights as required*/
+
+val f6 = f5.map(line=> line.split(",")(1)+" "+line.split(",")(3)+" "+line.split(",")(8)+" "+line.split(",")(4)+" "+line.split(",")(5)+" "+line.split(",")(9)+" "+line.split(",")(10)+" "+line.split(",")(6)+" "+line.split(",")(12))
+
+
+
